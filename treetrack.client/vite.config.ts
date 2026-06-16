@@ -55,6 +55,11 @@ export default defineConfig({
                 secure: false,
                 changeOrigin: true
             },
+            '/health': {
+                target,
+                secure: false,
+                changeOrigin: true
+            },
             '^/weatherforecast': {
                 target,
                 secure: false

@@ -80,6 +80,9 @@ builder.Services.AddScoped<ProjectAccessService>();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>("database");
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -134,6 +137,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.MapFallbackToFile("/index.html");
 
