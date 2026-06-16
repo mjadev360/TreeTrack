@@ -1,0 +1,6 @@
+@TreeTrack.Server_HostAddress = http://localhost:5239
+
+GET {{TreeTrack.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
