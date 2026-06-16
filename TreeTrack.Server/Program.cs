@@ -1,8 +1,20 @@
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TreeTrack.Server.Data;
 using TreeTrack.Server.Services;
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Information);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -40,10 +52,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowClient", policy =>
     {
         policy.WithOrigins(
-            "https://localhost:61869", 
-            "http://localhost:5173", 
+            "https://localhost:61869",
+            "http://localhost:5173",
             "https://localhost:5173",
-            "http://treetrack-production-2d33.up.railway.app"  // Add this
+            "https://treetrack-production-2d33.up.railway.app"
         )
         .AllowAnyMethod()
         .AllowAnyHeader()
@@ -52,6 +64,15 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddHttpLogging(options =>
+{
+    options.LoggingFields = HttpLoggingFields.RequestMethod
+        | HttpLoggingFields.RequestPath
+        | HttpLoggingFields.ResponseStatusCode
+        | HttpLoggingFields.Duration;
+    options.CombineLogs = true;
+});
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ProjectAccessService>();
@@ -61,6 +82,41 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler(errorApp =>
+    {
+        errorApp.Run(async context =>
+        {
+            var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+            var logger = context.RequestServices
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger("UnhandledException");
+
+            if (exception is not null)
+            {
+                logger.LogError(
+                    exception,
+                    "Unhandled exception processing {Method} {Path}",
+                    context.Request.Method,
+                    context.Request.Path);
+            }
+
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new
+            {
+                success = false,
+                message = "An unexpected error occurred."
+            });
+        });
+    });
+}
+
 app.UseDefaultFiles();
 app.MapStaticAssets();
 
@@ -69,7 +125,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-//app.UseHttpsRedirection();
+app.UseForwardedHeaders();
+app.UseHttpLogging();
 
 app.UseCors("AllowClient");
 
@@ -79,5 +136,13 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
+
+var startupLogger = app.Services
+    .GetRequiredService<ILoggerFactory>()
+    .CreateLogger("Startup");
+startupLogger.LogInformation(
+    "Starting TreeTrack ({Environment}). Database configured: {DbConfigured}",
+    app.Environment.EnvironmentName,
+    !string.IsNullOrWhiteSpace(connectionString));
 
 app.Run();
