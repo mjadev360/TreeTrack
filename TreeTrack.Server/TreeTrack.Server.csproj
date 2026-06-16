@@ -8,7 +8,8 @@
     <SpaRoot>..\treetrack.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:61869</SpaProxyServerUrl>
-    <UserSecretsId>8c3f2a1b-4d5e-6f70-8192-a3b4c5d6e7f8</UserSecretsId>
+    <UserSecretsId>8c3f2a1b-4d5e-6f70-8192-a3b4c5d6e7f8</UserSecretsId>  
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsNamespaces>  
   </PropertyGroup>
 
   <ItemGroup>
