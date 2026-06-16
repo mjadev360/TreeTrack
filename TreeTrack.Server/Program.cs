@@ -62,7 +62,7 @@ builder.Services.AddCors(options =>
             "https://localhost:61869",
             "http://localhost:5173",
             "https://localhost:5173",
-            "https://treetrack-production-2d33.up.railway.app"
+            "https://mjadev360.github.io"
         )
         .AllowAnyMethod()
         .AllowAnyHeader()
