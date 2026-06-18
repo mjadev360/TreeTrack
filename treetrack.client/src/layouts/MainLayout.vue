@@ -26,14 +26,14 @@ const authStore = useAuthStore()
   align-items: center;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #0d0f12;
+  color: #e2e8f0;
 }
 
 .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  border: 4px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  border-top: 4px solid white;
+  border-top: 4px solid #4fffb0;
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
@@ -50,8 +50,9 @@ const authStore = useAuthStore()
 }
 
 p {
-  font-size: 18px;
+  font-size: 14px;
   margin: 0;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .app-wrapper {

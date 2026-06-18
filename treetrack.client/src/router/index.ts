@@ -42,7 +42,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: NotFoundPage
+    component: NotFoundPage,
+    meta: { layout: 'issues' }
   }
 ]
 

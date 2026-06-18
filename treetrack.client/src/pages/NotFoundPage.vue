@@ -1,63 +1,78 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
+import '@/assets/issue-tracker.css'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+async function handleLogout() {
+  await authStore.logout()
+  router.push({ name: 'Login' })
+}
 </script>
 
 <template>
-  <div class="not-found-container">
-    <div class="not-found-content">
-      <h1>404</h1>
-      <h2>Page Not Found</h2>
-      <p>Sorry, the page you're looking for doesn't exist.</p>
-      <RouterLink to="/workspace" class="back-link">Go to workspace</RouterLink>
+  <div class="issue-tracker not-found-page">
+    <div class="topbar">
+      <div class="logo">Tree<span>Track</span></div>
+      <div class="topbar-sep"></div>
+      <div class="breadcrumb">
+        <strong>404</strong>
+      </div>
+      <div class="topbar-actions">
+        <RouterLink to="/workspace" class="btn btn-primary">Go to workspace</RouterLink>
+        <button v-if="authStore.isAuthenticated" class="btn" @click="handleLogout">
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <div class="not-found-body">
+      <h1 class="not-found-code">404</h1>
+      <h2 class="not-found-title">Page Not Found</h2>
+      <p class="not-found-message">Sorry, the page you're looking for doesn't exist.</p>
     </div>
   </div>
 </template>
 
 <style scoped>
-.not-found-container {
+.not-found-body {
+  flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.not-found-content {
+  justify-content: center;
   text-align: center;
-  color: white;
+  padding: 24px;
 }
 
-h1 {
-  font-size: 96px;
-  margin: 0;
-  font-weight: 700;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+.not-found-code {
+  font-family: 'Syne', sans-serif;
+  font-size: 72px;
+  font-weight: 800;
+  color: var(--accent);
+  margin: 0 0 8px;
+  letter-spacing: -2px;
+  line-height: 1;
 }
 
-h2 {
-  font-size: 36px;
-  margin: 10px 0 20px 0;
-}
-
-p {
-  font-size: 18px;
-  margin: 0 0 30px 0;
-  opacity: 0.9;
-}
-
-.back-link {
-  display: inline-block;
-  padding: 12px 30px;
-  background: white;
-  color: #667eea;
-  text-decoration: none;
-  border-radius: 4px;
+.not-found-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
   font-weight: 600;
-  transition: transform 0.2s, box-shadow 0.2s;
+  color: var(--text);
+  margin: 0 0 12px;
 }
 
-.back-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+.not-found-message {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.topbar-actions .btn {
+  display: inline-block;
+  text-decoration: none;
 }
 </style>

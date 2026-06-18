@@ -343,7 +343,9 @@
   color: var(--text-muted);
   font-size: 8px;
   flex-shrink: 0;
-  margin-right: 2px;
+  padding: 5px;
+  margin: -5px 2px -5px -5px;
+  cursor: pointer;
   transition: transform 0.15s;
 }
 
@@ -353,6 +355,7 @@
 
 .issue-tracker .node-toggle.leaf {
   opacity: 0;
+  pointer-events: none;
 }
 
 .issue-tracker .node-icon {

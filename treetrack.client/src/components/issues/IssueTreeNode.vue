@@ -19,22 +19,27 @@ const isExpanded = computed(() => issueStore.expandedIds.has(props.node.id))
 const isSelected = computed(() => issueStore.selectedId === props.node.id)
 const typeIcon = computed(() => TYPE_ICONS[props.node.type] ?? TYPE_ICONS.task)
 
-function handleClick() {
+function handleRowClick() {
+  issueStore.selectIssue(props.node.id)
+}
+
+function handleToggleClick(event: MouseEvent) {
+  event.stopPropagation()
   if (hasChildren.value) {
     issueStore.toggleExpand(props.node.id)
   }
-  issueStore.selectIssue(props.node.id)
 }
 </script>
 
 <template>
   <div class="node">
-    <div class="node-row" :class="{ selected: isSelected }" @click="handleClick">
+    <div class="node-row" :class="{ selected: isSelected }" @click="handleRowClick">
       <div class="node-indent" style="padding-left: 16px; display: flex; align-items: center">
         <div v-for="i in depth" :key="i" class="indent-guide"></div>
         <span
           class="node-toggle"
           :class="{ open: isExpanded, leaf: !hasChildren }"
+          @click="handleToggleClick"
         >▶</span>
       </div>
       <div class="node-icon" :class="typeIcon.class">{{ typeIcon.icon }}</div>
