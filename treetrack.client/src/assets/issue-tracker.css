@@ -125,8 +125,43 @@
   overflow: hidden;
 }
 
+.issue-tracker .sidebar-wrapper {
+  width: 260px;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: width 0.2s;
+}
+
+.issue-tracker .sidebar-wrapper.collapsed {
+  width: 0;
+}
+
+.issue-tracker .sidebar-wrapper .sidebar {
+  border-right: none;
+}
+
+.issue-tracker .sidebar-toggle {
+  flex-shrink: 0;
+  width: 14px;
+  align-self: stretch;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 8px;
+  padding: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.issue-tracker .sidebar-toggle:hover {
+  background: var(--surface2);
+  color: var(--accent);
+}
+
 .issue-tracker .sidebar {
   width: 260px;
+  height: 100%;
   border-right: 1px solid var(--border);
   background: var(--surface);
   display: flex;
