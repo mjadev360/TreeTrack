@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useIssueStore } from '@/stores/issueStore'
 import { useProjectStore } from '@/stores/projectStore'
-import type { IssueDetail, IssuePriority, IssueStatus, IssueType } from '@/types/issue'
+import type { IssuePriority, IssueStatus, IssueType } from '@/types/issue'
 import '@/assets/issue-tracker.css'
 import IssueTopBar from '@/components/issues/IssueTopBar.vue'
 import IssueSidebar from '@/components/issues/IssueSidebar.vue'
@@ -20,8 +20,6 @@ const projectStore = useProjectStore()
 
 const sidebarCollapsed = ref(false)
 const modalOpen = ref(false)
-const modalMode = ref<'create' | 'edit'>('create')
-const editingIssue = ref<IssueDetail | null>(null)
 const parentIssueId = ref<number | null>(null)
 const loadError = ref<string | null>(null)
 
@@ -60,40 +58,17 @@ watch(
 )
 
 function openNewIssue() {
-  modalMode.value = 'create'
-  editingIssue.value = null
-  parentIssueId.value = null
-  modalOpen.value = true
-}
-
-function openEdit() {
-  if (!issueStore.selectedIssue) return
-  modalMode.value = 'edit'
-  editingIssue.value = {
-    id: issueStore.selectedIssue.id,
-    key: issueStore.selectedIssue.key,
-    parentIssueId: null,
-    type: issueStore.selectedIssue.type,
-    title: issueStore.selectedIssue.title,
-    status: issueStore.selectedIssue.status,
-    priority: issueStore.selectedIssue.priority,
-    assignee: issueStore.selectedIssue.assignee,
-    dueDate: issueStore.selectedIssue.dueDate,
-    description: issueStore.selectedIssue.description
-  }
   parentIssueId.value = null
   modalOpen.value = true
 }
 
 function openSubIssue() {
   if (!issueStore.selectedIssue) return
-  modalMode.value = 'create'
-  editingIssue.value = null
   parentIssueId.value = issueStore.selectedIssue.id
   modalOpen.value = true
 }
 
-async function handleSave(payload: {
+async function handleCreate(payload: {
   title: string
   type: IssueType
   status: IssueStatus
@@ -104,28 +79,16 @@ async function handleSave(payload: {
   parentIssueId?: number | null
 }) {
   try {
-    if (modalMode.value === 'create') {
-      await issueStore.createIssue({
-        title: payload.title,
-        type: payload.type,
-        parentIssueId: payload.parentIssueId,
-        status: payload.status,
-        priority: payload.priority,
-        assignee: payload.assignee,
-        dueDate: payload.dueDate,
-        description: payload.description
-      })
-    } else if (editingIssue.value) {
-      await issueStore.updateIssue(editingIssue.value.id, {
-        title: payload.title,
-        type: payload.type,
-        status: payload.status,
-        priority: payload.priority,
-        assignee: payload.assignee,
-        dueDate: payload.dueDate,
-        description: payload.description
-      })
-    }
+    await issueStore.createIssue({
+      title: payload.title,
+      type: payload.type,
+      parentIssueId: payload.parentIssueId,
+      status: payload.status,
+      priority: payload.priority,
+      assignee: payload.assignee,
+      dueDate: payload.dueDate,
+      description: payload.description
+    })
     modalOpen.value = false
   } catch {
     // error surfaced via store
@@ -174,7 +137,6 @@ async function handleDelete() {
       </div>
 
       <IssueDetailPanel
-        @edit="openEdit"
         @sub-issue="openSubIssue"
         @delete="handleDelete"
       />
@@ -184,11 +146,9 @@ async function handleDelete() {
 
     <IssueFormModal
       :open="modalOpen"
-      :mode="modalMode"
-      :issue="editingIssue"
       :parent-issue-id="parentIssueId"
       @close="modalOpen = false"
-      @save="handleSave"
+      @save="handleCreate"
     />
   </div>
 </template>
