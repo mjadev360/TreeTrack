@@ -163,7 +163,7 @@ watch([title, assignee, description], scheduleSave)
           <input v-model="dueDate" type="date" class="form-input" />
         </div>
 
-        <div class="form-field">
+        <div class="form-field detail-desc-field">
           <label class="form-label">Description</label>
           <textarea
             v-model="description"
