@@ -3,6 +3,10 @@ import { useIssueStore } from '@/stores/issueStore'
 import IssueTreeNode from './IssueTreeNode.vue'
 
 const issueStore = useIssueStore()
+
+defineEmits<{
+  subIssue: [issueId: number]
+}>()
 </script>
 
 <template>
@@ -34,6 +38,7 @@ const issueStore = useIssueStore()
           :key="node.id"
           :node="node"
           :depth="0"
+          @sub-issue="$emit('subIssue', $event)"
         />
       </template>
     </div>

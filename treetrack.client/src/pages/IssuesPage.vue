@@ -62,10 +62,14 @@ function openNewIssue() {
   modalOpen.value = true
 }
 
+function openSubIssueFor(issueId: number) {
+  parentIssueId.value = issueId
+  modalOpen.value = true
+}
+
 function openSubIssue() {
   if (!issueStore.selectedIssue) return
-  parentIssueId.value = issueStore.selectedIssue.id
-  modalOpen.value = true
+  openSubIssueFor(issueStore.selectedIssue.id)
 }
 
 async function handleCreate(payload: {
@@ -133,7 +137,7 @@ async function handleDelete() {
 
       <div class="main">
         <IssueSearchBar />
-        <IssueTreeView />
+        <IssueTreeView @sub-issue="openSubIssueFor" />
       </div>
 
       <IssueDetailPanel

@@ -12,6 +12,10 @@ const props = defineProps<{
   depth: number
 }>()
 
+const emit = defineEmits<{
+  subIssue: [issueId: number]
+}>()
+
 const issueStore = useIssueStore()
 
 const hasChildren = computed(() => props.node.children.length > 0)
@@ -28,6 +32,11 @@ function handleToggleClick(event: MouseEvent) {
   if (hasChildren.value) {
     issueStore.toggleExpand(props.node.id)
   }
+}
+
+function handleAddSubIssue(event: MouseEvent) {
+  event.stopPropagation()
+  emit('subIssue', props.node.id)
 }
 </script>
 
@@ -46,6 +55,11 @@ function handleToggleClick(event: MouseEvent) {
       <div class="node-title-wrap">
         <span class="node-id">{{ node.key }}</span>
         <span class="node-title" :class="{ done: node.status === 'closed' }">{{ node.title }}</span>
+        <button
+          class="node-add-sub"
+          title="Add sub-issue"
+          @click="handleAddSubIssue"
+        >+</button>
       </div>
       <div class="col-status">
         <IssueBadge :status="node.status" />
@@ -65,6 +79,7 @@ function handleToggleClick(event: MouseEvent) {
         :key="child.id"
         :node="child"
         :depth="depth + 1"
+        @sub-issue="emit('subIssue', $event)"
       />
     </div>
   </div>
