@@ -57,5 +57,6 @@ export const inviteService = {
 }
 
 export function buildInviteUrl(token: string): string {
-  return `${window.location.origin}/invite/${token}`
+  const base = import.meta.env.BASE_URL
+  return `${window.location.origin}${base}invite/${token}`
 }
