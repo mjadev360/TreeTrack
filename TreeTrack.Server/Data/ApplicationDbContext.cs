@@ -10,6 +10,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Issue> Issues => Set<Issue>();
+    public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
+    public DbSet<ProjectInvite> ProjectInvites => Set<ProjectInvite>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -48,6 +50,43 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(i => i.ParentIssue)
                 .WithMany(i => i.Children)
                 .HasForeignKey(i => i.ParentIssueId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ProjectMember>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.Property(m => m.UserId).HasMaxLength(450).IsRequired();
+            entity.HasIndex(m => new { m.ProjectId, m.UserId }).IsUnique();
+
+            entity.HasOne(m => m.Project)
+                .WithMany(p => p.Members)
+                .HasForeignKey(m => m.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ProjectInvite>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+            entity.Property(i => i.Email).HasMaxLength(256).IsRequired();
+            entity.Property(i => i.Token).HasMaxLength(64).IsRequired();
+            entity.Property(i => i.InvitedByUserId).HasMaxLength(450).IsRequired();
+            entity.HasIndex(i => i.Token).IsUnique();
+            entity.HasIndex(i => new { i.ProjectId, i.Email });
+
+            entity.HasOne(i => i.Project)
+                .WithMany(p => p.Invites)
+                .HasForeignKey(i => i.ProjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(i => i.InvitedBy)
+                .WithMany()
+                .HasForeignKey(i => i.InvitedByUserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

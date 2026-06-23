@@ -4,6 +4,7 @@ export interface Project {
   key: string
   createdAt: string
   issueCount: number
+  isOwner: boolean
 }
 
 export interface CreateProjectRequest {

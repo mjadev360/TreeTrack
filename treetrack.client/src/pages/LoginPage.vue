@@ -32,6 +32,12 @@ const handleSubmit = async () => {
 
     if (!authStore.isAuthenticated) return
 
+    const invite = route.query.invite as string | undefined
+    if (invite) {
+      router.push({ name: 'Invite', params: { token: invite } })
+      return
+    }
+
     const redirect = route.query.redirect as string | undefined
     router.push(redirect || { name: 'Workspace' })
   } catch (error) {
@@ -102,7 +108,7 @@ const handleClearError = () => {
       </form>
 
       <div class="auth-footer">
-        <p>Don't have an account? <RouterLink to="/register">Register here</RouterLink></p>
+        <p>Don't have an account? <RouterLink :to="route.query.invite ? `/register?invite=${route.query.invite}` : '/register'">Register here</RouterLink></p>
       </div>
     </div>
   </div>

@@ -6,6 +6,7 @@ import { useProjectStore } from '@/stores/projectStore'
 import type { Project } from '@/types/project'
 import '@/assets/issue-tracker.css'
 import ProjectFormModal from '@/components/workspace/ProjectFormModal.vue'
+import ShareProjectModal from '@/components/workspace/ShareProjectModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -14,6 +15,8 @@ const projectStore = useProjectStore()
 const modalOpen = ref(false)
 const modalMode = ref<'create' | 'edit'>('create')
 const editingProject = ref<Project | null>(null)
+const shareModalOpen = ref(false)
+const sharingProject = ref<Project | null>(null)
 
 const totalIssues = computed(() =>
   projectStore.projects.reduce((sum, p) => sum + p.issueCount, 0)
@@ -35,6 +38,11 @@ function openEdit(project: Project) {
   modalMode.value = 'edit'
   editingProject.value = project
   modalOpen.value = true
+}
+
+function openShare(project: Project) {
+  sharingProject.value = project
+  shareModalOpen.value = true
 }
 
 function openProject(project: Project) {
@@ -156,7 +164,10 @@ function formatDate(dateStr: string) {
               class="project-row"
               @click="openProject(project)"
             >
-              <span class="col-title project-name">{{ project.name }}</span>
+              <span class="col-title project-name">
+                {{ project.name }}
+                <span v-if="!project.isOwner" class="shared-badge">Shared</span>
+              </span>
               <span class="col-key">
                 <span class="project-key-badge">{{ project.key }}</span>
               </span>
@@ -164,8 +175,9 @@ function formatDate(dateStr: string) {
               <span class="col-date">{{ formatDate(project.createdAt) }}</span>
               <span class="col-actions" @click.stop>
                 <button class="btn btn-sm" @click="openProject(project)">Open</button>
-                <button class="btn btn-sm" @click="openEdit(project)">Edit</button>
-                <button class="btn btn-sm btn-danger" @click="handleDelete(project)">Delete</button>
+                <button v-if="project.isOwner" class="btn btn-sm" @click="openShare(project)">Share</button>
+                <button v-if="project.isOwner" class="btn btn-sm" @click="openEdit(project)">Edit</button>
+                <button v-if="project.isOwner" class="btn btn-sm btn-danger" @click="handleDelete(project)">Delete</button>
               </span>
             </article>
           </div>
@@ -192,5 +204,27 @@ function formatDate(dateStr: string) {
       @close="modalOpen = false"
       @save="handleSave"
     />
+
+    <ShareProjectModal
+      :open="shareModalOpen"
+      :project="sharingProject"
+      @close="shareModalOpen = false"
+    />
   </div>
 </template>
+
+<style scoped>
+.shared-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  vertical-align: middle;
+}
+</style>

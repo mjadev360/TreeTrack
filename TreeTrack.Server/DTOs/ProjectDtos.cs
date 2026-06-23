@@ -7,6 +7,7 @@ public class ProjectDto
     public string Key { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public int IssueCount { get; set; }
+    public bool IsOwner { get; set; }
 }
 
 public class CreateProjectRequest

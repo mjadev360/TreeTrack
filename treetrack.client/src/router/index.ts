@@ -5,6 +5,7 @@ import RegisterPage from '@/pages/RegisterPage.vue'
 import WorkspacePage from '@/pages/WorkspacePage.vue'
 import NotFoundPage from '@/pages/NotFoundPage.vue'
 import IssuesPage from '@/pages/IssuesPage.vue'
+import InvitePage from '@/pages/InvitePage.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -37,6 +38,12 @@ const routes: RouteRecordRaw[] = [
     path: '/register',
     name: 'Register',
     component: RegisterPage,
+    meta: { requiresAuth: false, layout: 'auth' }
+  },
+  {
+    path: '/invite/:token',
+    name: 'Invite',
+    component: InvitePage,
     meta: { requiresAuth: false, layout: 'auth' }
   },
   {

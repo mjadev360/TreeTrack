@@ -30,7 +30,7 @@ public class IssuesController : ControllerBase
     [HttpGet("tree")]
     public async Task<ActionResult<List<IssueTreeNodeDto>>> GetTree(int projectId)
     {
-        var project = await _projectAccess.GetOwnedProjectAsync(projectId);
+        var project = await _projectAccess.GetAccessibleProjectAsync(projectId);
         if (project is null)
         {
             return NotFound(new { message = "Project not found" });
@@ -48,7 +48,7 @@ public class IssuesController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<IssueDetailDto>> GetById(int projectId, int id)
     {
-        var project = await _projectAccess.GetOwnedProjectAsync(projectId);
+        var project = await _projectAccess.GetAccessibleProjectAsync(projectId);
         if (project is null)
         {
             return NotFound(new { message = "Project not found" });
@@ -73,7 +73,7 @@ public class IssuesController : ControllerBase
             return BadRequest(new { message = "Title is required" });
         }
 
-        var project = await _projectAccess.GetOwnedProjectAsync(projectId);
+        var project = await _projectAccess.GetAccessibleProjectAsync(projectId);
         if (project is null)
         {
             return NotFound(new { message = "Project not found" });
@@ -132,7 +132,7 @@ public class IssuesController : ControllerBase
             return BadRequest(new { message = "Title is required" });
         }
 
-        var project = await _projectAccess.GetOwnedProjectAsync(projectId);
+        var project = await _projectAccess.GetAccessibleProjectAsync(projectId);
         if (project is null)
         {
             return NotFound(new { message = "Project not found" });
@@ -171,7 +171,7 @@ public class IssuesController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int projectId, int id)
     {
-        var project = await _projectAccess.GetOwnedProjectAsync(projectId);
+        var project = await _projectAccess.GetAccessibleProjectAsync(projectId);
         if (project is null)
         {
             return NotFound(new { message = "Project not found" });

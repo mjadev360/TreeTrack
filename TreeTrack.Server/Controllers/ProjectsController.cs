@@ -31,14 +31,14 @@ public class ProjectsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<ProjectDto>>> List()
     {
-        var ownerId = _projectAccess.GetCurrentUserId();
-        if (ownerId is null)
+        var userId = _projectAccess.GetCurrentUserId();
+        if (userId is null)
         {
             return Unauthorized();
         }
 
         var projects = await _db.Projects
-            .Where(p => p.OwnerId == ownerId)
+            .Where(p => p.OwnerId == userId || p.Members.Any(m => m.UserId == userId))
             .OrderBy(p => p.Name)
             .Select(p => new ProjectDto
             {
@@ -46,7 +46,8 @@ public class ProjectsController : ControllerBase
                 Name = p.Name,
                 Key = p.Key,
                 CreatedAt = p.CreatedAt,
-                IssueCount = p.Issues.Count
+                IssueCount = p.Issues.Count,
+                IsOwner = p.OwnerId == userId
             })
             .ToListAsync();
 
@@ -56,13 +57,19 @@ public class ProjectsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ProjectDto>> GetById(int id)
     {
-        var project = await _projectAccess.GetOwnedProjectAsync(id);
+        var userId = _projectAccess.GetCurrentUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var project = await _projectAccess.GetAccessibleProjectAsync(id);
         if (project is null)
         {
             return NotFound(new { message = "Project not found" });
         }
 
-        return Ok(ToDto(project));
+        return Ok(ToDto(project, project.OwnerId == userId));
     }
 
     [HttpPost]
@@ -99,7 +106,7 @@ public class ProjectsController : ControllerBase
         await _db.SaveChangesAsync();
 
         _logger.LogInformation("Created project {ProjectKey} for user {OwnerId}", project.Key, ownerId);
-        return CreatedAtAction(nameof(GetById), new { id = project.Id }, ToDto(project));
+        return CreatedAtAction(nameof(GetById), new { id = project.Id }, ToDto(project, isOwner: true));
     }
 
     [HttpPut("{id:int}")]
@@ -129,7 +136,7 @@ public class ProjectsController : ControllerBase
         await _db.SaveChangesAsync();
 
         _logger.LogInformation("Updated project {ProjectId}", project.Id);
-        return Ok(ToDto(project));
+        return Ok(ToDto(project, isOwner: true));
     }
 
     [HttpDelete("{id:int}")]
@@ -169,12 +176,13 @@ public class ProjectsController : ControllerBase
         return null;
     }
 
-    private static ProjectDto ToDto(Project project) => new()
+    private static ProjectDto ToDto(Project project, bool isOwner) => new()
     {
         Id = project.Id,
         Name = project.Name,
         Key = project.Key,
         CreatedAt = project.CreatedAt,
-        IssueCount = project.Issues.Count
+        IssueCount = project.Issues.Count,
+        IsOwner = isOwner
     };
 }

@@ -12,4 +12,6 @@ public class Project
 
     public IdentityUser Owner { get; set; } = null!;
     public ICollection<Issue> Issues { get; set; } = [];
+    public ICollection<ProjectMember> Members { get; set; } = [];
+    public ICollection<ProjectInvite> Invites { get; set; } = [];
 }

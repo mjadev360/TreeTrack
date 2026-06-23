@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { inviteService } from '@/services/inviteService'
 import type { RegisterRequest } from '@/services/authService'
 import '@/assets/issue-tracker.css'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const submitted = ref(false)
+const inviteToken = ref<string | null>(null)
+const inviteEmailLocked = ref(false)
 
 const passwordsMatch = computed(() => password.value === confirmPassword.value)
 
@@ -32,6 +36,20 @@ const formValid = computed(
     passwordsMatch.value
 )
 
+onMounted(async () => {
+  const token = route.query.invite as string | undefined
+  if (!token) return
+
+  inviteToken.value = token
+  try {
+    const preview = await inviteService.getPreview(token)
+    email.value = preview.email
+    inviteEmailLocked.value = true
+  } catch {
+    // invite preview unavailable; user can still register normally
+  }
+})
+
 const handleSubmit = async () => {
   if (!formValid.value) return
 
@@ -44,7 +62,11 @@ const handleSubmit = async () => {
     }
 
     await authStore.register(registerData)
-    if (authStore.isAuthenticated) {
+    if (!authStore.isAuthenticated) return
+
+    if (inviteToken.value) {
+      router.push({ name: 'Invite', params: { token: inviteToken.value } })
+    } else {
       router.push({ name: 'Workspace' })
     }
   } catch (error) {
@@ -78,6 +100,7 @@ const handleClearError = () => {
             type="email"
             placeholder="Enter your email"
             required
+            :readonly="inviteEmailLocked"
             :disabled="authStore.isLoading"
           />
         </div>
@@ -141,7 +164,10 @@ const handleClearError = () => {
       </form>
 
       <div class="auth-footer">
-        <p>Already have an account? <RouterLink to="/login">Login here</RouterLink></p>
+        <p>
+          Already have an account?
+          <RouterLink :to="inviteToken ? `/login?invite=${inviteToken}` : '/login'">Login here</RouterLink>
+        </p>
       </div>
     </div>
   </div>
