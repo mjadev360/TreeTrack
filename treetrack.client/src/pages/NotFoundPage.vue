@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import '@/assets/issue-tracker.css'
+import TopBar from '@/components/TopBar.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -14,19 +15,17 @@ async function handleLogout() {
 
 <template>
   <div class="issue-tracker not-found-page">
-    <div class="topbar">
-      <div class="logo">Tree<span>Track</span></div>
-      <div class="topbar-sep"></div>
-      <div class="breadcrumb">
+    <TopBar>
+      <template #breadcrumb>
         <strong>404</strong>
-      </div>
-      <div class="topbar-actions">
+      </template>
+      <template #actions>
         <RouterLink to="/workspace" class="btn btn-primary">Go to workspace</RouterLink>
         <button v-if="authStore.isAuthenticated" class="btn" @click="handleLogout">
           Logout
         </button>
-      </div>
-    </div>
+      </template>
+    </TopBar>
 
     <div class="not-found-body">
       <h1 class="not-found-code">404</h1>

@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useProjectStore } from '@/stores/projectStore'
 import type { Project } from '@/types/project'
 import '@/assets/issue-tracker.css'
+import TopBar from '@/components/TopBar.vue'
 import ProjectFormModal from '@/components/workspace/ProjectFormModal.vue'
 import ShareProjectModal from '@/components/workspace/ShareProjectModal.vue'
 
@@ -91,17 +92,15 @@ function formatDate(dateStr: string) {
 
 <template>
   <div class="issue-tracker">
-    <div class="topbar">
-      <div class="logo">Tree<span>Track</span></div>
-      <div class="topbar-sep"></div>
-      <div class="breadcrumb">
+    <TopBar>
+      <template #breadcrumb>
         <strong>workspace</strong>
-      </div>
-      <div class="topbar-actions">
+      </template>
+      <template #actions>
         <button class="btn btn-primary" @click="openCreate">+ New Project</button>
         <button class="btn" @click="handleLogout">Logout</button>
-      </div>
-    </div>
+      </template>
+    </TopBar>
 
     <div class="layout">
       <div class="sidebar">

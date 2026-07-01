@@ -1,25 +1,29 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 import { useIssueStore } from '@/stores/issueStore'
 import { useProjectStore } from '@/stores/projectStore'
 import type { IssuePriority, IssueStatus, IssueType } from '@/types/issue'
 import '@/assets/issue-tracker.css'
-import IssueTopBar from '@/components/issues/IssueTopBar.vue'
+import TopBar from '@/components/TopBar.vue'
 import IssueSidebar from '@/components/issues/IssueSidebar.vue'
 import IssueSearchBar from '@/components/issues/IssueSearchBar.vue'
 import IssueTreeView from '@/components/issues/IssueTreeView.vue'
 import IssueDetailPanel from '@/components/issues/IssueDetailPanel.vue'
 import IssueStatusBar from '@/components/issues/IssueStatusBar.vue'
 import IssueFormModal from '@/components/issues/IssueFormModal.vue'
+import ShareProjectModal from '@/components/workspace/ShareProjectModal.vue'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 const issueStore = useIssueStore()
 const projectStore = useProjectStore()
 
 const sidebarCollapsed = ref(false)
 const modalOpen = ref(false)
+const shareModalOpen = ref(false)
 const parentIssueId = ref<number | null>(null)
 const loadError = ref<string | null>(null)
 
@@ -112,6 +116,11 @@ async function handleDelete() {
     // error surfaced via store
   }
 }
+
+async function handleLogout() {
+  await authStore.logout()
+  router.push({ name: 'Login' })
+}
 </script>
 
 <template>
@@ -120,7 +129,26 @@ async function handleDelete() {
     <router-link to="/workspace">Back to Workspace</router-link>
   </div>
   <div v-else class="issue-tracker">
-    <IssueTopBar @new-issue="openNewIssue" />
+    <TopBar>
+      <template #breadcrumb>
+        <router-link to="/workspace" class="breadcrumb-link">workspace</router-link>
+        <span style="color: var(--border2)">/</span>
+        <strong>{{ projectStore.currentProject?.name ?? '...' }}</strong>
+      </template>
+      <template #actions>
+        <button class="btn" @click="issueStore.collapseAll()">⊟ Collapse All</button>
+        <button class="btn" @click="issueStore.expandAll()">⊞ Expand All</button>
+        <button
+          v-if="projectStore.currentProject?.isOwner"
+          class="btn"
+          @click="shareModalOpen = true"
+        >
+          Share
+        </button>
+        <button class="btn btn-primary" @click="openNewIssue">+ New Issue</button>
+        <button class="btn" @click="handleLogout">Logout</button>
+      </template>
+    </TopBar>
 
     <div class="layout">
       <div class="sidebar-wrapper" :class="{ collapsed: sidebarCollapsed }">
@@ -153,6 +181,12 @@ async function handleDelete() {
       :parent-issue-id="parentIssueId"
       @close="modalOpen = false"
       @save="handleCreate"
+    />
+
+    <ShareProjectModal
+      :open="shareModalOpen"
+      :project="projectStore.currentProject"
+      @close="shareModalOpen = false"
     />
   </div>
 </template>
